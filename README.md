@@ -64,3 +64,18 @@ A self-contained FEMA emergency-preparedness assistant, "ReadyNow!":
 ![ReadyNow! architecture: solid navy arrows are sub_agents/SequentialAgent structure, dashed amber arrows are isolated AgentTool calls](Challenge6_JayWatson_ArchitectureDiagram.png)
 
 Solid navy = structural `sub_agents` composition. Dashed amber = isolated `AgentTool` calls — used for every specialist here because `news_search_agent`'s `google_search` tool can't coexist with the implicit transfer tool a plain `sub_agents` membership would add.
+
+## Bonus — Web Front End
+
+`web/`
+
+A Streamlit chat UI in front of the deployed ReadyNow! agent, hosted on Cloud Run, with **Weathy** 🧭 as the mascot — the header logo and every assistant chat bubble's avatar.
+
+- `app.py` calls the already-deployed Agent Engine directly via `agent_engines.get()` + `stream_query()`, so the web app is a thin client on top of Challenge 6's deployment, not a second copy of the agent
+- `weathy.svg` — hand-authored SVG mascot, wired in as `st.image` (header) and `st.chat_message(..., avatar=...)`
+- `deploy.sh` — one idempotent script wrapping the IAM grant (`roles/aiplatform.user` for Cloud Run's service account) and the Cloud Run deploy
+- `Dockerfile` — Cloud Build's shared worker pool was stuck queued for 15+ minutes during the live training day (likely cohort contention), so the container was built locally in Cloud Shell with `docker build` / `docker push` and deployed with `gcloud run deploy --image`, bypassing the remote build queue entirely
+
+`Challenge6_JayWatson_WebAppDeployment.png` — the deployed app, live on Cloud Run.
+
+![ReadyNow! web app, deployed on Cloud Run, with Weathy the mascot as the header logo and chat avatar](Challenge6_JayWatson_WebAppDeployment.png)
